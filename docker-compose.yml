@@ -9,8 +9,6 @@ services:
       - ./hr_service:/var/www/html
     networks:
       - mcp_network
-    extra_hosts:
-      - "host.docker.internal:172.17.0.1"
     depends_on:
       redis:
         condition: service_healthy
@@ -24,8 +22,6 @@ services:
       - ./hub_service:/var/www/html
     networks:
       - mcp_network
-    extra_hosts:
-      - "host.docker.internal:172.17.0.1"
     depends_on:
       redis:
         condition: service_healthy

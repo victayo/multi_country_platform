@@ -1,104 +1,75 @@
-# Multi Country Platform (Laravel)
+# Multi Country Platform
 
-This project runs Laravel with Docker services for:
+## Installation
 
-- app (PHP-FPM 8.2)
-- nginx (HTTP server)
-- mysql (database)
-- redis (cache)
-- rabbitmq (message broker)
+This project runs two Laravel microservices (`hr_service` and `hub_service`) with Docker:
 
-## Prerequisites
+- `hr_app` (PHP-FPM)
+- `hub_app` (PHP-FPM)
+- `nginx`
+- `mysql`
+- `redis`
+- `rabbitmq`
 
-- Docker Desktop (or Docker Engine + Compose v2)
-- Docker Compose (`docker compose` command)
+### Prerequisites
 
-## Project Structure Notes
+- Docker Desktop (or Docker Engine + Docker Compose v2)
+- Hosts entries:
+  - `127.0.0.1 hr.localhost`
+  - `127.0.0.1 hub.localhost`
 
-- Laravel app source is in `html/`
-- Docker files are in the repository root
-- `docker-compose.yml` mounts `./html` into `/var/www/html` for both `app` and `nginx`
+### Steps
 
-## Installation (Docker)
-
-Run the following from the repository root (the folder that contains `docker-compose.yml`):
-
-1. Create the external Docker network (first time only):
+1. From the project root, create the external Docker network (first time only):
 
 	```bash
 	docker network create mcp_network
 	```
 
-2. Build the app image:
+2. Ensure env files exist for both services:
 
-	```bash
-	docker compose build app
-	```
+	- `hr_service/.env`
+	- `hub_service/.env`
 
-3. Start all services:
-
-	```bash
-	docker compose up -d
-	```
-
-4. Ensure environment file exists in `html/.env` and has Docker DB values:
+3. In both env files, set database host/port to Docker MySQL:
 
 	```dotenv
 	DB_CONNECTION=mysql
 	DB_HOST=mysql
 	DB_PORT=3306
-	DB_DATABASE=multi_country_platform
 	DB_USERNAME=mcp_user
 	DB_PASSWORD=mcp_password
 	```
 
-5. Clear cached config and run migrations:
+4. Set service-specific database names:
+
+	- In `hr_service/.env`: `DB_DATABASE=hr_service`
+	- In `hub_service/.env`: `DB_DATABASE=hub_service`
+
+5. Build and start containers:
 
 	```bash
-	docker compose exec app php artisan config:clear
-	docker compose exec app php artisan migrate
+	docker compose build hr_app hub_app
+	docker compose up -d
 	```
 
-## Access
+6. Generate app keys (one time per service):
 
-- App URL: `http://localhost:8080`
-- RabbitMQ UI: `http://localhost:15672` (guest / guest)
-- MySQL host from your machine: `127.0.0.1:3310`
+	```bash
+	docker compose exec hr_app php artisan key:generate
+	docker compose exec hub_app php artisan key:generate
+	```
 
-## Useful Commands
+7. Clear config cache and run migrations in both services:
 
-- Show logs:
+	```bash
+	docker compose exec hr_app php artisan config:clear
+	docker compose exec hub_app php artisan config:clear
+	docker compose exec hr_app php artisan migrate --force
+	docker compose exec hub_app php artisan migrate --force
+	```
 
-  ```bash
-  docker compose logs -f
-  ```
+8. Access the apps:
 
-- Open a shell in app container:
-
-  ```bash
-  docker compose exec app bash
-  ```
-
-- Check migration status:
-
-  ```bash
-  docker compose exec app php artisan migrate:status
-  ```
-
-- Stop services:
-
-  ```bash
-  docker compose down
-  ```
-
-## Troubleshooting
-
-### `SQLSTATE[HY000] [2002] No such file or directory`
-
-Cause: Laravel is trying to connect to MySQL using `localhost` from inside the app container.
-
-Fix: In `html/.env`, set `DB_HOST=mysql` and `DB_PORT=3306`, then run:
-
-```bash
-docker compose exec app php artisan config:clear
-```
+	- `http://hr.localhost:8080`
+	- `http://hub.localhost:8080`
