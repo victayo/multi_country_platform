@@ -10,18 +10,30 @@
 docker-compose*.yml
 
 # Laravel application artifacts
-html/vendor
-html/node_modules
-html/storage/logs
-html/storage/framework/cache
-html/storage/framework/sessions
-html/storage/framework/views
-html/bootstrap/cache/*.php
+hr_service/vendor
+hr_service/node_modules
+hr_service/storage/logs
+hr_service/storage/framework/cache
+hr_service/storage/framework/sessions
+hr_service/storage/framework/views
+hr_service/bootstrap/cache/*.php
+
+hub_service/vendor
+hub_service/node_modules
+hub_service/storage/logs
+hub_service/storage/framework/cache
+hub_service/storage/framework/sessions
+hub_service/storage/framework/views
+hub_service/bootstrap/cache/*.php
 
 # Frontend/build artifacts
-html/public/build
+hr_service/public/build
+hub_service/public/build
 
 # Test and misc artifacts
-html/.phpunit.cache
-html/npm-debug.log
-html/yarn-error.log
+hr_service/.phpunit.cache
+hr_service/npm-debug.log
+hr_service/yarn-error.log
+hub_service/.phpunit.cache
+hub_service/npm-debug.log
+hub_service/yarn-error.log
