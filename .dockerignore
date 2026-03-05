@@ -1,0 +1,27 @@
+.git
+.gitignore
+.vscode
+.idea
+
+# Docker and local environment files
+.env
+.env.*
+
+docker-compose*.yml
+
+# Laravel application artifacts
+html/vendor
+html/node_modules
+html/storage/logs
+html/storage/framework/cache
+html/storage/framework/sessions
+html/storage/framework/views
+html/bootstrap/cache/*.php
+
+# Frontend/build artifacts
+html/public/build
+
+# Test and misc artifacts
+html/.phpunit.cache
+html/npm-debug.log
+html/yarn-error.log

@@ -1,0 +1,85 @@
+services:
+  # Laravel application service
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mainbridge_be
+    volumes:
+      - ./html:/var/www/html
+      - ./supervisor/worker.conf:/etc/supervisor/conf.d/worker.conf
+    networks:
+      - mcp_network
+    extra_hosts:
+      - "host.docker.internal:172.17.0.1"
+    depends_on:
+      redis:
+        condition: service_healthy
+  
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: mcp_rabbitmq
+    ports:
+      - "5672:5672"   # RabbitMQ server
+      - "15672:15672" # RabbitMQ management UI
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    networks:
+      - mcp_network
+
+  # Nginx service
+  nginx:
+    image: nginx:alpine
+    container_name: mcp_nginx
+    ports:
+      - "8080:80"
+    volumes:
+      - ./html:/var/www/html
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - mcp_network
+    depends_on:
+      - app
+
+  # Redis cache
+  redis:
+    image: redis:7-alpine
+    container_name: mcp_redis
+    restart: unless-stopped
+    networks:
+      - mcp_network
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mysql:
+    image: mysql:8.0
+    container_name: mcp_mysql
+    restart: unless-stopped
+    ports:
+      - "3310:3306" # open for local tools
+    environment:
+      MYSQL_DATABASE: multi_country_platform
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: mcp_user
+      MYSQL_PASSWORD: mcp_password
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - mcp_network
+
+networks:
+  mcp_network:
+    external: true
+
+volumes:
+  redis_data:
+  db_data:
+  rabbitmq_data:
