@@ -1,4 +1,4 @@
-FROM php:8.2-fpm
+FROM php:8.4-fpm
 
 WORKDIR /var/www/html
 
@@ -16,7 +16,6 @@ RUN apt-get update && apt-get install -y \
     libicu-dev \
     libpq-dev \
     libssl-dev \
-    supervisor \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) \
         bcmath \
@@ -27,6 +26,7 @@ RUN apt-get update && apt-get install -y \
         pcntl \
         pdo \
         pdo_mysql \
+        sockets \
         zip \
     && pecl install redis \
     && docker-php-ext-enable redis \
