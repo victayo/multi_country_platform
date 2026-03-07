@@ -14,6 +14,7 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libxml2-dev \
     libicu-dev \
+    libsqlite3-dev \
     libpq-dev \
     libssl-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
@@ -24,8 +25,8 @@ RUN apt-get update && apt-get install -y \
         intl \
         mbstring \
         pcntl \
-        pdo \
         pdo_mysql \
+        pdo_sqlite \
         sockets \
         zip \
     && pecl install redis \

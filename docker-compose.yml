@@ -25,6 +25,21 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+
+  hub_consumer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hub_consumer
+    command: php artisan rabbitmq:consume-employees
+    restart: unless-stopped
+    volumes:
+      - ./hub_service:/var/www/html
+    networks:
+      - mcp_network
+    depends_on:
+      - rabbitmq
+      - hub_app
   
   rabbitmq:
     image: rabbitmq:3-management-alpine
