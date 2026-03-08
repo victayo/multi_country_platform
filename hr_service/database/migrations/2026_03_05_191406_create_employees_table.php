@@ -17,10 +17,10 @@ return new class extends Migration
             $table->string('last_name');
             $table->decimal('salary', 15, 2);
             $table->string('country');
-            $table->string('ssn')->unique();
-            $table->string('address');
-            $table->string('goal');
-            $table->string('tax_id')->unique();
+            $table->string('ssn')->unique()->nullable();
+            $table->string('address')->nullable();
+            $table->string('goal')->nullable();
+            $table->string('tax_id')->unique()->nullable();
             $table->timestamps();
         });
     }
