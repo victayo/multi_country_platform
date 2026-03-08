@@ -2,10 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Contracts\EmployeeServiceInterface;
+use App\Http\Requests\CreateEmployeeRequest;
+use App\Models\Employee;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
-class EmployeeController extends Controller
+class EmployeeController extends ApiController
 {
+    public function __construct(private EmployeeServiceInterface $employeeService)
+    {
+    }
     /**
      * Display a listing of the resource.
      */
@@ -17,9 +24,11 @@ class EmployeeController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(CreateEmployeeRequest $request)
     {
-        //
+        $data = $request->validated();
+        $employee = $this->employeeService->create($data);
+        return $this->respondSuccess($employee, 'Employee created successfully', Response::HTTP_CREATED);
     }
 
     /**
@@ -27,22 +36,30 @@ class EmployeeController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $employee = $this->employeeService->findById($id);
+        if (!$employee) {
+            return $this->respondError('Employee not found', null, Response::HTTP_NOT_FOUND);
+        }
+        return $this->respondSuccess($employee, 'Employee retrieved successfully');
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Employee $employee)
     {
-        //
+
+        $data = $request->all();
+        $updatedEmployee = $this->employeeService->update($employee, $data);
+        return $this->respondSuccess($updatedEmployee, 'Employee updated successfully');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Employee $employee)
     {
-        //
+        $this->employeeService->delete($employee);
+        return $this->respondSuccess(null, 'Employee deleted successfully');
     }
 }

@@ -16,4 +16,9 @@ class Employee extends Model
         'goal',
         'tax_id',
     ];
+
+    protected $casts = [
+        'salary' => 'float',
+        'country' => \App\Enums\Country::class,
+    ];
 }
