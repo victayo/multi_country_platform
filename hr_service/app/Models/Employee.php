@@ -19,6 +19,5 @@ class Employee extends Model
 
     protected $casts = [
         'salary' => 'float',
-        'country' => \App\Enums\Country::class,
     ];
 }

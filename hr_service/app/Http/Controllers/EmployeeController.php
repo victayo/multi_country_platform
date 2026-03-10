@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Contracts\EmployeeServiceInterface;
 use App\Http\Requests\CreateEmployeeRequest;
+use App\Http\Requests\UpdateEmployeeRequest;
 use App\Models\Employee;
-use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class EmployeeController extends ApiController
@@ -46,10 +46,9 @@ class EmployeeController extends ApiController
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Employee $employee)
+    public function update(UpdateEmployeeRequest $request, Employee $employee)
     {
-
-        $data = $request->all();
+        $data = $request->validated();
         $updatedEmployee = $this->employeeService->update($employee, $data);
         return $this->respondSuccess($updatedEmployee, 'Employee updated successfully');
     }
