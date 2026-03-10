@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Checklist\Services\ChecklistAggregator;
 use App\Checklist\Services\ChecklistService;
 use App\Contracts\EmployeeRepositoryInterface;
+use App\Http\Requests\ChecklistRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
@@ -16,9 +17,9 @@ class ChecklistController extends Controller
         private ChecklistAggregator $aggregator
     ) {}
 
-    public function index(Request $request)
+    public function index(ChecklistRequest $request)
     {
-        $country = $request->query('country');
+        $country = strtolower($request->query('country'));
 
         $result = Cache::remember(
             "checklist:$country",
@@ -26,7 +27,8 @@ class ChecklistController extends Controller
             function () use ($country) {
 
                 $employees = $this->repository
-                    ->findByCountry($country);
+                    ->findByCountry($country)
+                    ->get();
 
                 $evaluations = $this->checklistService
                     ->evaluate($employees->toArray(), $country);

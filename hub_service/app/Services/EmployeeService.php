@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Contracts\EmployeeRepositoryInterface;
 use App\Models\Employee;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Cache;
 
 class EmployeeService
 {
@@ -43,6 +44,8 @@ class EmployeeService
 
     public function updateFromEvent(array $eventData): void
     {
+        $country = strtolower($eventData['country']);
+        Cache::forget("checklist:$country");
         $employee = $eventData['data']['employee'];
         $data = [
             'id' => $employee['id'],

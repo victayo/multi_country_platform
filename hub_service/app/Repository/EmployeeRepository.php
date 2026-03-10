@@ -3,7 +3,7 @@
 namespace App\Repository;
 
 use App\Models\Employee;
-use Illuminate\Database\Eloquent\Collection;
+// use Illuminate\Database\Query\Builder;
 
 class EmployeeRepository implements \App\Contracts\EmployeeRepositoryInterface
 {
@@ -23,8 +23,8 @@ class EmployeeRepository implements \App\Contracts\EmployeeRepositoryInterface
         Employee::where('id', $employeeId)->delete();
     }
 
-    public function findByCountry(string $country): Collection
+    public function findByCountry(string $country): \Illuminate\Database\Eloquent\Builder
     {
-        return Employee::where('country', $country)->get();
+        return Employee::where('country', $country);
     }
 }

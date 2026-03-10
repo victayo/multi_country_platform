@@ -2,7 +2,6 @@
 
 namespace App\Contracts;
 
-use Illuminate\Database\Eloquent\Collection;
 
 interface EmployeeRepositoryInterface
 {
@@ -12,5 +11,5 @@ interface EmployeeRepositoryInterface
 
     public function deleteFromEvent(int $employeeId): void;
 
-    public function findByCountry(string $country): Collection;
+    public function findByCountry(string $country): \Illuminate\Database\Eloquent\Builder;
 }
