@@ -2,8 +2,8 @@
 
 namespace App\Providers;
 
-use App\Contracts\EmployeeRepositoryInterface;
-use App\Repository\EmployeeRepository;
+use App\Domain\Employees\Contracts\EmployeeRepositoryInterface;
+use App\Domain\Employees\Repository\EmployeeRepository;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider

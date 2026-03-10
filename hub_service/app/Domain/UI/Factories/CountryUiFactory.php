@@ -2,12 +2,12 @@
 
 namespace App\Domain\UI\Factories;
 
-use App\UI\Providers\GermanyStepsProvider;
-use App\UI\Providers\UsaStepsProvider;
-use App\UI\Schema\GermanyDashboardSchema;
-use App\UI\Schema\GermanyEmployeeTableSchema;
-use App\UI\Schema\UsaDashboardSchema;
-use App\UI\Schema\UsaEmployeeTableSchema;
+use App\Domain\UI\Providers\GermanyStepsProvider;
+use App\Domain\UI\Providers\UsaStepsProvider;
+use App\Domain\UI\Schema\GermanyDashboardSchema;
+use App\Domain\UI\Schema\GermanyEmployeeTableSchema;
+use App\Domain\UI\Schema\UsaDashboardSchema;
+use App\Domain\UI\Schema\UsaEmployeeTableSchema;
 use Exception;
 
 class CountryUiFactory
