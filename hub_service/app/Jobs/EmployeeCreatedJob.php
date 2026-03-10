@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Services\EmployeeService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Foundation\Queue\Queueable;
@@ -24,5 +25,7 @@ class EmployeeCreatedJob implements ShouldQueue
     public function handle(): void
     {
         Log::info('Employee Created Job executed with data: ', $this->employeeData);
+        $employeeService = app(EmployeeService::class);
+        $employeeService->createFromEvent($this->employeeData);
     }
 }
