@@ -35,4 +35,16 @@ return [
         ],
     ],
 
+    'rabbitmq' => [
+        'enabled' => filter_var(env('RABBITMQ_ENABLED', true), FILTER_VALIDATE_BOOL),
+        'host' => env('RABBITMQ_HOST', 'rabbitmq'),
+        'port' => (int) env('RABBITMQ_PORT', 5672),
+        'user' => env('RABBITMQ_USER', 'guest'),
+        'password' => env('RABBITMQ_PASSWORD', 'guest'),
+        'vhost' => env('RABBITMQ_VHOST', '/'),
+        'exchange' => env('RABBITMQ_EXCHANGE', 'employees.events'),
+        'queue' => env('RABBITMQ_QUEUE', 'hub.employees.events.queue'),
+        'routing_key_pattern' => env('RABBITMQ_ROUTING_KEY_PATTERN', 'employee.#'),
+    ],
+
 ];

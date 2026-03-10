@@ -15,11 +15,6 @@ class AppServiceProvider extends ServiceProvider
             \App\Contracts\EmployeeServiceInterface::class,
             \App\Services\EmployeeService::class
         );
-
-        $this->app->bind(
-            \App\Contracts\PublisherInterface::class,
-            \App\Services\RabbitMQPublisher::class
-        );
     }
 
     /**
