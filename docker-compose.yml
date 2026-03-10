@@ -31,7 +31,7 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: hub_consumer
-    command: php artisan rabbitmq:consume-employees
+    command: php artisan queue:work --sleep=3 --tries=3
     restart: unless-stopped
     volumes:
       - ./hub_service:/var/www/html
