@@ -7,6 +7,7 @@ services:
     container_name: hr_app
     volumes:
       - ./hr_service:/var/www/html
+      - ./hr_service:/var/www/hr_service
     networks:
       - mcp_network
     depends_on:
@@ -20,6 +21,7 @@ services:
     container_name: hub_app
     volumes:
       - ./hub_service:/var/www/html
+      - ./hub_service:/var/www/hub_service
     networks:
       - mcp_network
     depends_on:
