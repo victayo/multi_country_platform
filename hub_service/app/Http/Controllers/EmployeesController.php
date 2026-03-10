@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Contracts\EmployeeRepositoryInterface;
-use App\UI\Factories\CountryUiFactory;
+use App\Domain\Employees\Contracts\EmployeeRepositoryInterface;
+use App\Http\Requests\CountryRequest;
+use App\Domain\UI\Factories\CountryUiFactory;
 use Illuminate\Http\Request;
 
 class EmployeesController extends Controller
@@ -13,7 +14,7 @@ class EmployeesController extends Controller
         private CountryUiFactory $factory
     ) {}
 
-    public function index(Request $request)
+    public function index(CountryRequest $request)
     {
         $country = $request->query('country');
 

@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Checklist\Services\ChecklistAggregator;
-use App\Checklist\Services\ChecklistService;
-use App\Contracts\EmployeeRepositoryInterface;
-use App\Http\Requests\ChecklistRequest;
+use App\Domain\Checklist\Services\ChecklistAggregator;
+use App\Domain\Checklist\Services\ChecklistService;
+use App\Domain\Employees\Contracts\EmployeeRepositoryInterface;
+use App\Http\Requests\CountryRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
@@ -17,7 +17,7 @@ class ChecklistController extends Controller
         private ChecklistAggregator $aggregator
     ) {}
 
-    public function index(ChecklistRequest $request)
+    public function index(CountryRequest $request)
     {
         $country = strtolower($request->query('country'));
 

@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\UI\Factories\CountryUiFactory;
-use Illuminate\Http\Request;
+use App\Http\Requests\CountryRequest;
+use App\Domain\UI\Factories\CountryUiFactory;
 
 class SchemaController extends Controller
 {
@@ -11,7 +11,7 @@ class SchemaController extends Controller
         private CountryUiFactory $factory
     ) {}
 
-    public function show(Request $request, $step)
+    public function show(CountryRequest $request, $step)
     {
         $country = $request->query('country');
 

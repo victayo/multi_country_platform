@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\UI\Factories\CountryUiFactory;
-use Illuminate\Http\Request;
+use App\Domain\UI\Factories\CountryUiFactory;
+use App\Http\Requests\CountryRequest;
 
 class StepsController extends Controller
 {
@@ -11,7 +11,7 @@ class StepsController extends Controller
         private CountryUiFactory $factory
     ) {}
 
-    public function __invoke(Request $request)
+    public function __invoke(CountryRequest $request)
     {
         $country = $request->query('country');
 
