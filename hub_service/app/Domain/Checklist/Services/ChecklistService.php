@@ -41,21 +41,16 @@ class ChecklistService
     public function countrySummary(string $country): array
     {
         $country = strtolower($country);
-        $key = "checklist:$country";
-        if (CountryCache::hasCountry($country)) {
-            return CountryCache::get($country);
-        }
 
-        $employees = $this->employeeRepository
-                    ->findByCountry($country)
-                    ->get();
-        $evaluations = $this->evaluate($employees->toArray(), $country);
+        return CountryCache::remember($country, function () use ($country): array {
+            $employees = $this->employeeRepository
+                        ->findByCountry($country)
+                        ->get();
 
-        $result = $this->aggregator
-                    ->aggregate($evaluations);
+            $evaluations = $this->evaluate($employees->toArray(), $country);
 
-        CountryCache::put($country, $result);
-
-        return $result;
+            return $this->aggregator
+                        ->aggregate($evaluations);
+        });
     }
 }

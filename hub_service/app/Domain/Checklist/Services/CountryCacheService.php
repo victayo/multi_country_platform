@@ -2,6 +2,8 @@
 
 namespace App\Domain\Checklist\Services;
 
+use Closure;
+
 class CountryCacheService
 {
     private const CHECKLIST_CACHE_PREFIX = 'checklist:';
@@ -16,6 +18,17 @@ class CountryCacheService
     {
         $country = strtolower($country);
         cache()->put(self::CHECKLIST_CACHE_PREFIX . $country, $value, now()->addMinutes($minutes));
+    }
+
+    public function remember(string $country, Closure $callback, int $minutes = 10): array
+    {
+        $country = strtolower($country);
+
+        return cache()->remember(
+            self::CHECKLIST_CACHE_PREFIX . $country,
+            now()->addMinutes($minutes),
+            static fn (): array => $callback()
+        );
     }
 
     public function hasCountry(string $country): bool
