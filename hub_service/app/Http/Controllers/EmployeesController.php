@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\DTO\ApiResponse;
 use App\Domain\Employees\Contracts\EmployeeRepositoryInterface;
 use App\Http\Requests\CountryRequest;
 use App\Domain\UI\Factories\CountryUiFactory;
-use Illuminate\Http\Request;
+use App\Http\Resources\ApiResponseResource;
+use Illuminate\Http\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 class EmployeesController extends Controller
 {
@@ -14,7 +17,7 @@ class EmployeesController extends Controller
         private CountryUiFactory $factory
     ) {}
 
-    public function index(CountryRequest $request)
+    public function index(CountryRequest $request): JsonResponse
     {
         $country = $request->query('country');
 
@@ -24,13 +27,22 @@ class EmployeesController extends Controller
             ->findByCountry($country)
             ->paginate(10);
 
-        return response()->json([
-            "columns" => $schema->columns(),
-            "data" => $employees->items(),
-            "pagination" => [
-                "total" => $employees->total(),
-                "page" => $employees->currentPage()
-            ]
-        ]);
+        return $this->apiResponse(
+            ApiResponse::success('Employees retrieved successfully', [
+                'columns' => $schema->columns(),
+                'data' => $employees->items(),
+                'pagination' => [
+                    'total' => $employees->total(),
+                    'page' => $employees->currentPage(),
+                ],
+            ], Response::HTTP_OK)
+        );
+    }
+
+    private function apiResponse(ApiResponse $apiResponse): JsonResponse
+    {
+        return (new ApiResponseResource($apiResponse))
+            ->response()
+            ->setStatusCode($apiResponse->statusCode ?? Response::HTTP_OK);
     }
 }

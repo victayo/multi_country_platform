@@ -41,17 +41,25 @@ class ChecklistEndpointsTest extends TestCase
         $response
             ->assertOk()
             ->assertJsonStructure([
-                'total_employees',
-                'completed',
-                'completion_rate',
-                'employees' => [
-                    '*' => ['employee_id', 'complete', 'missing_fields', 'completed_fields'],
+                'success',
+                'message',
+                'data' => [
+                    'total_employees',
+                    'completed',
+                    'completion_rate',
+                    'employees' => [
+                        '*' => ['employee_id', 'complete', 'missing_fields', 'completed_fields'],
+                    ],
                 ],
             ])
             ->assertJson([
-                'total_employees' => 2,
-                'completed' => 1,
-                'completion_rate' => 50,
+                'success' => true,
+                'message' => 'Checklist summary retrieved successfully',
+                'data' => [
+                    'total_employees' => 2,
+                    'completed' => 1,
+                    'completion_rate' => 50,
+                ],
             ]);
     }
 
@@ -70,7 +78,9 @@ class ChecklistEndpointsTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJsonCount(3)
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('message', 'Steps retrieved successfully')
+            ->assertJsonCount(3, 'data')
             ->assertJsonFragment(['id' => 'documentation']);
     }
 
@@ -93,11 +103,17 @@ class ChecklistEndpointsTest extends TestCase
         $response
             ->assertOk()
             ->assertJsonStructure([
-                'columns',
-                'data',
-                'pagination' => ['total', 'page'],
+                'success',
+                'message',
+                'data' => [
+                    'columns',
+                    'data',
+                    'pagination' => ['total', 'page'],
+                ],
             ])
-            ->assertJsonPath('pagination.total', 1)
-            ->assertJsonPath('data.0.id', 21);
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('message', 'Employees retrieved successfully')
+            ->assertJsonPath('data.pagination.total', 1)
+            ->assertJsonPath('data.data.0.id', 21);
     }
 }

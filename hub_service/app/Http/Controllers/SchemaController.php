@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\DTO\ApiResponse;
 use App\Http\Requests\CountryRequest;
 use App\Domain\UI\Factories\CountryUiFactory;
+use App\Http\Resources\ApiResponseResource;
+use Illuminate\Http\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 class SchemaController extends Controller
 {
@@ -11,7 +15,7 @@ class SchemaController extends Controller
         private CountryUiFactory $factory
     ) {}
 
-    public function show(CountryRequest $request, $step)
+    public function show(CountryRequest $request, $step): JsonResponse
     {
         $country = $request->query('country');
 
@@ -19,11 +23,22 @@ class SchemaController extends Controller
 
             $schema = $this->factory->dashboardSchema($country);
 
-            return response()->json([
-                "widgets" => $schema->widgets()
-            ]);
+            return $this->apiResponse(
+                ApiResponse::success('Schema retrieved successfully', [
+                    'widgets' => $schema->widgets(),
+                ], Response::HTTP_OK)
+            );
         }
 
-        return response()->json([]);
+        return $this->apiResponse(
+            ApiResponse::success('Schema retrieved successfully', [], Response::HTTP_OK)
+        );
+    }
+
+    private function apiResponse(ApiResponse $apiResponse): JsonResponse
+    {
+        return (new ApiResponseResource($apiResponse))
+            ->response()
+            ->setStatusCode($apiResponse->statusCode ?? Response::HTTP_OK);
     }
 }
