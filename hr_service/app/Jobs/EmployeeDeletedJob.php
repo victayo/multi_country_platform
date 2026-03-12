@@ -7,6 +7,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
 class EmployeeDeletedJob implements ShouldQueue
 {
@@ -25,6 +26,10 @@ class EmployeeDeletedJob implements ShouldQueue
      */
     public function handle(): void
     {
-        //
+        Log::info('Processing employee deleted event in hr service job', [
+            'event_type' => $this->employeeData['event_type'] ?? $this->employeeData['event'] ?? 'EmployeeDeleted',
+            'event_id' => $this->employeeData['event_id'] ?? null,
+            'employee_id' => $this->employeeData['data']['employee']['id'] ?? null,
+        ]);
     }
 }

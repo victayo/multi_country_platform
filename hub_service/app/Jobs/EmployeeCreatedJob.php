@@ -9,6 +9,7 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class EmployeeCreatedJob implements ShouldQueue
 {
@@ -24,8 +25,34 @@ class EmployeeCreatedJob implements ShouldQueue
      */
     public function handle(): void
     {
-        Log::info('Employee Created Job executed with data: ', $this->employeeData);
-        $employeeService = app(EmployeeService::class);
-        $employeeService->createFromEvent($this->employeeData);
+        $eventType = $this->employeeData['event_type'] ?? $this->employeeData['event'] ?? 'unknown';
+        $eventId = $this->employeeData['event_id'] ?? null;
+        $employeeId = $this->employeeData['data']['employee']['id'] ?? null;
+
+        Log::info('Processing employee created event', [
+            'event_type' => $eventType,
+            'event_id' => $eventId,
+            'employee_id' => $employeeId,
+        ]);
+
+        try {
+            $employeeService = app(EmployeeService::class);
+            $employeeService->createFromEvent($this->employeeData);
+
+            Log::info('Employee created event processed successfully', [
+                'event_type' => $eventType,
+                'event_id' => $eventId,
+                'employee_id' => $employeeId,
+            ]);
+        } catch (Throwable $exception) {
+            Log::error('Failed processing employee created event', [
+                'event_type' => $eventType,
+                'event_id' => $eventId,
+                'employee_id' => $employeeId,
+                'error' => $exception->getMessage(),
+            ]);
+
+            throw $exception;
+        }
     }
 }
