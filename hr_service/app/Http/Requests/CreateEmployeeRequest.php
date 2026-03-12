@@ -24,12 +24,17 @@ class CreateEmployeeRequest extends FormRequest
         return [
             'name' => 'required',
             'last_name' => 'required',
-            'salary' => 'required|numeric|min:1',
+            'salary' => 'nullable|numeric|min:0',
             'country' => 'required|in:USA,Germany',
-            'ssn' => 'nullable|required_if:country,USA|unique:employees,ssn',
-            'address' => 'nullable|required_if:country,USA',
-            'goal' => 'nullable|required_if:country,Germany',
-            'tax_id' => ['nullable', 'required_if:country,Germany', 'regex:/^DE\d{9}$/', 'unique:employees,tax_id'],
+            'ssn' => 'nullable|unique:employees,ssn',
+            'address' => 'nullable',
+            'goal' => 'nullable',
+            'tax_id' => ['nullable', 'regex:/^DE\d{9}$/', 'unique:employees,tax_id'],
+            // 'salary' => 'required|numeric|min:1',
+            // 'ssn' => 'nullable|required_if:country,USA|unique:employees,ssn',
+            // 'address' => 'nullable|required_if:country,USA',
+            // 'goal' => 'nullable|required_if:country,Germany',
+            // 'tax_id' => ['nullable', 'required_if:country,Germany', 'regex:/^DE\d{9}$/', 'unique:employees,tax_id'],
         ];
     }
 }

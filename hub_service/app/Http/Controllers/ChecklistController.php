@@ -2,42 +2,26 @@
 
 namespace App\Http\Controllers;
 
-use App\Domain\Checklist\Services\ChecklistAggregator;
 use App\Domain\Checklist\Services\ChecklistService;
-use App\Domain\Employees\Contracts\EmployeeRepositoryInterface;
 use App\Http\Requests\CountryRequest;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 
 class ChecklistController extends Controller
 {
     public function __construct(
-        private EmployeeRepositoryInterface $repository,
         private ChecklistService $checklistService,
-        private ChecklistAggregator $aggregator
     ) {}
 
     public function index(CountryRequest $request)
     {
         $country = strtolower($request->query('country'));
+        try{
 
-        $result = Cache::remember(
-            "checklist:$country",
-            now()->addMinutes(10),
-            function () use ($country) {
+            $result = $this->checklistService->countrySummary($country);
 
-                $employees = $this->repository
-                    ->findByCountry($country)
-                    ->get();
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'An error occurred while processing the checklist.'], 500);
+        }
 
-                $evaluations = $this->checklistService
-                    ->evaluate($employees->toArray(), $country);
-
-                return $this->aggregator
-                    ->aggregate($evaluations);
-            }
-        );
-
-        return response()->json($result);
     }
 }

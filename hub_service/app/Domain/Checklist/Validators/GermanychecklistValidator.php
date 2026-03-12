@@ -4,50 +4,67 @@ namespace App\Domain\Checklist\Validators;
 
 use App\Domain\Checklist\Contracts\ChecklistValidatorInterface;
 
-class GermanyChecklistValidator implements ChecklistValidatorInterface
+class GermanyChecklistValidator extends AbstractEmployeeChecklistValidator
 {
     public function validate(array $employee): array
     {
+        $missing = [];
+        $completed = [];
         $requiredFields = [
             'name',
             'last_name',
             'salary',
             'country',
-            'address',
+            'goal',
+            'tax_id',
         ];
+        $requiredFields = array_values(array_intersect($requiredFields, $this->getFillableFields()));
 
-        $missing = [];
-        $complete = [];
         foreach ($requiredFields as $field) {
-            if (empty($employee[$field])) {
-                $missing[] = $field;
-            }else {
-                $complete[] = $field;
+            $value = $employee[$field] ?? null;
+            $validationMessage = $this->validateField($field, $value);
+
+            if ($validationMessage !== null) {
+                $missing[] = [
+                    'field' => $field,
+                    'message' => $validationMessage,
+                ];
+                continue;
             }
-        }
 
-        if (empty($employee['goal'])) {
-            $missing[] = 'goal';
-        } else {
-            $complete[] = 'goal';
-        }
-
-        if (empty($employee['salary']) || $employee['salary'] <= 0) {
-            $missing[] = 'salary';
-        } else {
-            $complete[] = 'salary';
-        }
-
-        if (!preg_match('/^DE\d{9}$/', $employee['tax_id'] ?? '')) {
-            $missing[] = 'tax_id';
-        } else {
-            $complete[] = 'tax_id';
+            $completed[] = $field;
         }
 
         return [
-            'completed' => empty($missing),
+            'complete' => empty($missing),
             'missing' => $missing,
-            'complete' => $complete
+            'completed' => $completed,
         ];
+    }
+
+    private function validateField(string $field, mixed $value): ?string
+    {
+        if (is_string($value)) {
+            $value = trim($value);
+        }
+
+        if ($value === null || $value === '') {
+            return $field . ' is required';
+        }
+
+        return match ($field) {
+            'salary' => $this->validateSalary($value),
+            'tax_id' => $this->validateTaxId((string) $value),
+            default => null,
+        };
+    }
+
+    private function validateTaxId(string $taxId): ?string
+    {
+        if (!preg_match('/^DE\d{9}$/', trim($taxId))) {
+            return 'tax_id must be in DE123456789 format';
+        }
+
+        return null;
     }
 }
