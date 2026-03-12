@@ -14,19 +14,18 @@ use Illuminate\Support\Str;
 
 class EmployeeService implements EmployeeServiceInterface
 {
-    private const EMPLOYEE_TTL_SECONDS = 600;
-    private const EMPLOYEE_LIST_TTL_SECONDS = 180;
+    private const EMPLOYEE_LIST_VERSION_KEY = 'employees:list:version';
 
     /**
      * Return a cached employee list with optional country filtering.
      */
     public function list(?string $country, int $page, int $perPage): LengthAwarePaginator
     {
-        $version = (int) Cache::get('employees:list:version', 1);
+        $version = (int) Cache::get(self::EMPLOYEE_LIST_VERSION_KEY, 1);
         $countryKey = $country ?: 'all';
         $cacheKey = "employees:list:v{$version}:country:{$countryKey}:page:{$page}:per:{$perPage}";
 
-        return Cache::remember($cacheKey, self::EMPLOYEE_LIST_TTL_SECONDS, function () use ($country, $page, $perPage): LengthAwarePaginator {
+        return Cache::remember($cacheKey, $this->employeeListTtlSeconds(), function () use ($country, $page, $perPage): LengthAwarePaginator {
             return Employee::query()
                 ->when($country, fn ($query) => $query->where('country', $country))
                 ->orderBy('id')
@@ -126,7 +125,7 @@ class EmployeeService implements EmployeeServiceInterface
     {
         $cacheKey = "employee:{$id}";
 
-        return Cache::remember($cacheKey, self::EMPLOYEE_TTL_SECONDS, fn () => Employee::find($id));
+        return Cache::remember($cacheKey, $this->employeeDetailTtlSeconds(), fn () => Employee::find($id));
     }
 
     /**
@@ -136,8 +135,8 @@ class EmployeeService implements EmployeeServiceInterface
     {
         Cache::forget("employee:{$employeeId}");
 
-        $version = (int) Cache::get('employees:list:version', 1);
-        Cache::forever('employees:list:version', $version + 1);
+        $version = (int) Cache::get(self::EMPLOYEE_LIST_VERSION_KEY, 1);
+        Cache::forever(self::EMPLOYEE_LIST_VERSION_KEY, $version + 1);
 
         $this->forgetChecklistCache($previousCountry);
 
@@ -153,6 +152,16 @@ class EmployeeService implements EmployeeServiceInterface
         }
 
         Cache::forget("checklist:{$country}");
+    }
+
+    private function employeeListTtlSeconds(): int
+    {
+        return ((int) config('cache_ttl.employee_list_pages', 5)) * 60;
+    }
+
+    private function employeeDetailTtlSeconds(): int
+    {
+        return ((int) config('cache_ttl.employee_detail', 2)) * 60;
     }
 
     /**

@@ -7,8 +7,8 @@ use Illuminate\Support\Facades\Facade;
 
 /**
  * @method static array|null get(string $country)
- * @method static void put(string $country, array $value, int $minutes = 10)
- * @method static array remember(string $country, \Closure $callback, int $minutes = 10)
+ * @method static void put(string $country, array $value, ?int $minutes = null)
+ * @method static array remember(string $country, \Closure $callback, ?int $minutes = null)
  * @method static bool hasCountry(string $country)
  * @method static void forget(string $country)
  */

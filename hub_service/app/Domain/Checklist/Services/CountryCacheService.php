@@ -14,19 +14,23 @@ class CountryCacheService
         return cache()->get(self::CHECKLIST_CACHE_PREFIX . $country);
     }
 
-    public function put(string $country, array $value, int $minutes = 10): void
+    public function put(string $country, array $value, ?int $minutes = null): void
     {
         $country = strtolower($country);
-        cache()->put(self::CHECKLIST_CACHE_PREFIX . $country, $value, now()->addMinutes($minutes));
+        cache()->put(
+            self::CHECKLIST_CACHE_PREFIX . $country,
+            $value,
+            now()->addMinutes($minutes ?? $this->defaultChecklistTtlMinutes())
+        );
     }
 
-    public function remember(string $country, Closure $callback, int $minutes = 10): array
+    public function remember(string $country, Closure $callback, ?int $minutes = null): array
     {
         $country = strtolower($country);
 
         return cache()->remember(
             self::CHECKLIST_CACHE_PREFIX . $country,
-            now()->addMinutes($minutes),
+            now()->addMinutes($minutes ?? $this->defaultChecklistTtlMinutes()),
             static fn (): array => $callback()
         );
     }
@@ -41,5 +45,10 @@ class CountryCacheService
     {
         $country = strtolower($country);
         cache()->forget(self::CHECKLIST_CACHE_PREFIX . $country);
+    }
+
+    private function defaultChecklistTtlMinutes(): int
+    {
+        return (int) config('cache_ttl.checklist_country_summary', 30);
     }
 }
