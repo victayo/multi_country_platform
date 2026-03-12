@@ -6,9 +6,10 @@ use App\Contracts\EmployeeServiceInterface;
 use App\Http\Requests\CreateEmployeeRequest;
 use App\Http\Requests\UpdateEmployeeRequest;
 use App\Models\Employee;
+use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class EmployeeController extends ApiController
+class EmployeeController extends Controller
 {
     public function __construct(private EmployeeServiceInterface $employeeService)
     {
@@ -16,9 +17,16 @@ class EmployeeController extends ApiController
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $country = $request->query('country');
+        $page = max((int) $request->query('page', 1), 1);
+        $perPage = (int) $request->query('per_page', 15);
+        $perPage = min(max($perPage, 1), 100);
+
+        $employees = $this->employeeService->list($country, $page, $perPage);
+
+        return response()->json(['employees' => $employees]);
     }
 
     /**
@@ -28,7 +36,7 @@ class EmployeeController extends ApiController
     {
         $data = $request->validated();
         $employee = $this->employeeService->create($data);
-        return $this->respondSuccess($employee, 'Employee created successfully', Response::HTTP_CREATED);
+        return response()->json(['employee' => $employee], Response::HTTP_CREATED);
     }
 
     /**
@@ -38,9 +46,9 @@ class EmployeeController extends ApiController
     {
         $employee = $this->employeeService->findById($id);
         if (!$employee) {
-            return $this->respondError('Employee not found', null, Response::HTTP_NOT_FOUND);
+            return response()->json(['error' => 'Employee not found'], Response::HTTP_NOT_FOUND);
         }
-        return $this->respondSuccess($employee, 'Employee retrieved successfully');
+        return response()->json(['employee' => $employee]);
     }
 
     /**
@@ -50,7 +58,7 @@ class EmployeeController extends ApiController
     {
         $data = $request->validated();
         $updatedEmployee = $this->employeeService->update($employee, $data);
-        return $this->respondSuccess($updatedEmployee, 'Employee updated successfully');
+        return response()->json(['employee' => $updatedEmployee], Response::HTTP_OK);
     }
 
     /**
@@ -59,6 +67,6 @@ class EmployeeController extends ApiController
     public function destroy(Employee $employee)
     {
         $this->employeeService->delete($employee);
-        return $this->respondSuccess(null, 'Employee deleted successfully');
+        return response()->json(['message' => 'Employee deleted successfully'], Response::HTTP_OK);
     }
 }

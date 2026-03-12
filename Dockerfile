@@ -27,6 +27,7 @@ RUN apt-get update && apt-get install -y \
         pcntl \
         pdo_mysql \
         pdo_sqlite \
+        sqlite3 \
         sockets \
         zip \
     && pecl install redis \

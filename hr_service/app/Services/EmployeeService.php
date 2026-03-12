@@ -7,11 +7,33 @@ use App\Jobs\EmployeeCreatedJob;
 use App\Jobs\EmployeeDeletedJob;
 use App\Jobs\EmployeeUpdatedJob;
 use App\Models\Employee;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class EmployeeService implements EmployeeServiceInterface
 {
+    private const EMPLOYEE_TTL_SECONDS = 600;
+    private const EMPLOYEE_LIST_TTL_SECONDS = 180;
+
+    /**
+     * Return a cached employee list with optional country filtering.
+     */
+    public function list(?string $country, int $page, int $perPage): LengthAwarePaginator
+    {
+        $version = (int) Cache::get('employees:list:version', 1);
+        $countryKey = $country ?: 'all';
+        $cacheKey = "employees:list:v{$version}:country:{$countryKey}:page:{$page}:per:{$perPage}";
+
+        return Cache::remember($cacheKey, self::EMPLOYEE_LIST_TTL_SECONDS, function () use ($country, $page, $perPage): LengthAwarePaginator {
+            return Employee::query()
+                ->when($country, fn ($query) => $query->where('country', $country))
+                ->orderBy('id')
+                ->paginate($perPage, ['*'], 'page', $page);
+        });
+    }
+
     /**
      * Create a new employee and dispatch the creation event job.
      *
@@ -32,6 +54,7 @@ class EmployeeService implements EmployeeServiceInterface
             'event_id' => $payload['event_id'],
         ]);
 
+        $this->invalidateEmployeeCaches($employee->id, null, $employee->country);
         EmployeeCreatedJob::dispatch($payload);
         return $employee;
     }
@@ -43,6 +66,7 @@ class EmployeeService implements EmployeeServiceInterface
      */
     public function update(Employee $employee, array $data): Employee
     {
+        $previousCountry = $employee->country;
         $employee->update($data);
         Log::info('Employee updated', [
             'employee_id' => $employee->id,
@@ -57,6 +81,7 @@ class EmployeeService implements EmployeeServiceInterface
             'event_id' => $payload['event_id'],
         ]);
 
+        $this->invalidateEmployeeCaches($employee->id, $previousCountry, $employee->country);
         EmployeeUpdatedJob::dispatch($payload);
         return $employee;
     }
@@ -66,6 +91,7 @@ class EmployeeService implements EmployeeServiceInterface
      */
     public function delete(Employee $employee): bool
     {
+        $country = $employee->country;
         $payload = $this->employeePayload($employee, 'EmployeeDeleted');
         $deleted = $employee->delete();
 
@@ -81,6 +107,7 @@ class EmployeeService implements EmployeeServiceInterface
                 'event_id' => $payload['event_id'],
             ]);
 
+            $this->invalidateEmployeeCaches($employee->id, $country, null);
             EmployeeDeletedJob::dispatch($payload);
         } else {
             Log::warning('Employee delete failed', [
@@ -97,8 +124,35 @@ class EmployeeService implements EmployeeServiceInterface
      */
     public function findById(int $id): ?Employee
     {
-        $employee = Employee::find($id);
-        return $employee;
+        $cacheKey = "employee:{$id}";
+
+        return Cache::remember($cacheKey, self::EMPLOYEE_TTL_SECONDS, fn () => Employee::find($id));
+    }
+
+    /**
+     * Invalidate employee detail and list caches, including dependent checklist summaries.
+     */
+    private function invalidateEmployeeCaches(int $employeeId, ?string $previousCountry, ?string $currentCountry): void
+    {
+        Cache::forget("employee:{$employeeId}");
+
+        $version = (int) Cache::get('employees:list:version', 1);
+        Cache::forever('employees:list:version', $version + 1);
+
+        $this->forgetChecklistCache($previousCountry);
+
+        if ($currentCountry !== $previousCountry) {
+            $this->forgetChecklistCache($currentCountry);
+        }
+    }
+
+    private function forgetChecklistCache(?string $country): void
+    {
+        if (!$country) {
+            return;
+        }
+
+        Cache::forget("checklist:{$country}");
     }
 
     /**
