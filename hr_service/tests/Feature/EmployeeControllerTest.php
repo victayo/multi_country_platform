@@ -45,9 +45,11 @@ class EmployeeControllerTest extends TestCase
         $payload = $response->getData(true);
 
         $this->assertSame(200, $response->getStatusCode());
-        $this->assertArrayHasKey('employees', $payload);
-        $this->assertSame(2, $payload['employees']['current_page']);
-        $this->assertCount(2, $payload['employees']['data']);
+        $this->assertTrue($payload['success']);
+        $this->assertSame('Employees retrieved successfully', $payload['message']);
+        $this->assertArrayHasKey('employees', $payload['data']);
+        $this->assertSame(2, $payload['data']['employees']['current_page']);
+        $this->assertCount(2, $payload['data']['employees']['data']);
     }
 
     public function test_store_returns_created_employee_payload(): void
@@ -84,8 +86,10 @@ class EmployeeControllerTest extends TestCase
         $payload = $response->getData(true);
 
         $this->assertSame(201, $response->getStatusCode());
-        $this->assertSame(10, $payload['employee']['id']);
-        $this->assertSame('John', $payload['employee']['name']);
+        $this->assertTrue($payload['success']);
+        $this->assertSame('Employee created successfully', $payload['message']);
+        $this->assertSame(10, $payload['data']['employee']['id']);
+        $this->assertSame('John', $payload['data']['employee']['name']);
     }
 
     public function test_show_returns_not_found_when_employee_does_not_exist(): void
@@ -103,7 +107,9 @@ class EmployeeControllerTest extends TestCase
         $payload = $response->getData(true);
 
         $this->assertSame(404, $response->getStatusCode());
-        $this->assertSame('Employee not found', $payload['error']);
+        $this->assertFalse($payload['success']);
+        $this->assertSame('Employee not found', $payload['message']);
+        $this->assertNull($payload['data']);
     }
 
     public function test_update_returns_updated_employee_payload(): void
@@ -139,7 +145,9 @@ class EmployeeControllerTest extends TestCase
         $payload = $response->getData(true);
 
         $this->assertSame(200, $response->getStatusCode());
-        $this->assertSame(80000, $payload['employee']['salary']);
+        $this->assertTrue($payload['success']);
+        $this->assertSame('Employee updated successfully', $payload['message']);
+        $this->assertSame(80000, $payload['data']['employee']['salary']);
     }
 
     public function test_destroy_returns_success_message(): void
@@ -165,6 +173,8 @@ class EmployeeControllerTest extends TestCase
         $payload = $response->getData(true);
 
         $this->assertSame(200, $response->getStatusCode());
+        $this->assertTrue($payload['success']);
         $this->assertSame('Employee deleted successfully', $payload['message']);
+        $this->assertNull($payload['data']);
     }
 }
