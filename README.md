@@ -7,7 +7,7 @@ This project runs two Laravel microservices (`hr_service` and `hub_service`) wit
 - `hr_app` (PHP-FPM)
 - `hub_app` (PHP-FPM)
 - `nginx`
-- `mysql`
+- `postgres`
 - `redis`
 - `rabbitmq`
 
@@ -31,12 +31,12 @@ This project runs two Laravel microservices (`hr_service` and `hub_service`) wit
 	- `hr_service/.env`
 	- `hub_service/.env`
 
-3. In both env files, set database host/port to Docker MySQL:
+3. In both env files, set database host/port to Docker PostgreSQL:
 
 	```dotenv
-	DB_CONNECTION=mysql
-	DB_HOST=mysql
-	DB_PORT=3306
+	DB_CONNECTION=pgsql
+	DB_HOST=postgres
+	DB_PORT=5432
 	DB_USERNAME=mcp_user
 	DB_PASSWORD=mcp_password
 	```

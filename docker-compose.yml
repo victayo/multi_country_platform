@@ -13,6 +13,8 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+      postgres:
+        condition: service_healthy
 
   hub_app:
     build:
@@ -26,6 +28,8 @@ services:
       - mcp_network
     depends_on:
       redis:
+        condition: service_healthy
+      postgres:
         condition: service_healthy
 
   hub_consumer:
@@ -42,6 +46,7 @@ services:
     depends_on:
       - rabbitmq
       - hub_app
+      - postgres
   
   rabbitmq:
     image: rabbitmq:3-management-alpine
@@ -88,20 +93,26 @@ services:
       timeout: 5s
       retries: 5
 
-  mysql:
-    image: mysql:8.0
-    container_name: mcp_mysql
+  postgres:
+    image: postgres:16-alpine
+    container_name: mcp_postgres
     restart: unless-stopped
     ports:
-      - "3310:3306" # open for local tools
+      - "5432:5432" # open for local tools
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_USER: mcp_user
-      MYSQL_PASSWORD: mcp_password
+      POSTGRES_USER: mcp_user
+      POSTGRES_PASSWORD: mcp_password
+      POSTGRES_DB: postgres
     volumes:
-      - db_data:/var/lib/mysql
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init-databases.sql:/docker-entrypoint-initdb.d/init-databases.sql:ro
     networks:
       - mcp_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mcp_user -d postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 networks:
   mcp_network:
@@ -109,5 +120,5 @@ networks:
 
 volumes:
   redis_data:
-  db_data:
+  postgres_data:
   rabbitmq_data:

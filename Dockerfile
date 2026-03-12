@@ -18,19 +18,19 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     libssl-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) \
+    && docker-php-ext-install \
         bcmath \
         exif \
         gd \
         intl \
         mbstring \
         pcntl \
-        pdo_mysql \
+        pdo_pgsql \
         pdo_sqlite \
-        sqlite3 \
         sockets \
         zip \
-    && pecl install redis \
+    && pecl channel-update pecl.php.net \
+    && pecl install redis-6.3.0 \
     && docker-php-ext-enable redis \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
